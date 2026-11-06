@@ -1,0 +1,105 @@
+# ============================================================
+#  BorderGuard v1.0.0  ·  玩家行动区域限制
+#  ------------------------------------------------------------
+#  每个世界独立的边界数据保存在：
+#     plugins/BorderGuard/regions/<世界名>.yml
+#  改完任意 yml 后执行 /border reload 即可生效（无需重启）
+#
+#  快速上手：
+#     1) /border wand      领取调试杖
+#     2) 右键 添加节点（至少 3 个，构成多边形）
+#     3) 左键 撤销上一个节点；潜行+右键 开关边界线预览
+#     4) 节点数达标后区域自动生效，玩家越界会被拦下并冒黑烟
+# ============================================================
+
+settings:
+  # 是否启用越界拦截（关闭后只保留调试显示，玩家可自由走动）
+  enforce: true
+
+  # 区域生效所需的最少节点数（多边形至少 3 个，写小于 3 也会按 3 处理）
+  min-nodes: 3
+
+  # 玩家已经在边界外时的处理方式
+  #   PUSH  = 慢慢拽回最近的边界内侧（平滑，推荐）
+  #   SPAWN = 传送到该世界设定的救援点（/border spawn 设置）
+  #   NONE  = 不处理（只拦截"从内向外"的穿越）
+  rescue: PUSH
+
+  # PUSH 模式下每 tick 往界内拽多少格（0.9 已经能顶住疾跑）
+  rescue-speed: 0.9
+
+  # 同一条提示的最短间隔（毫秒），防止贴着墙走时刷屏
+  message-cooldown-ms: 3000
+
+  # 撞到边界时是否发提示文字
+  touch-message: true
+
+  # 被推回时是否发提示文字
+  push-message: true
+
+  # 这些游戏模式不受边界限制
+  ignore-gamemodes:
+    - SPECTATOR
+
+  # OP 是否无视边界（false = OP 也会被拦，方便自己测试）
+  ignore-ops: false
+
+  # 拥有该权限的玩家无视边界
+  bypass-permission: "borderguard.bypass"
+
+  # 拦截末影珍珠 / 紫颂果之类"瞬移出界"
+  teleport-guard: true
+
+  # 玩家上线 / 换世界时若落在界外，自动送回
+  rescue-on-join: true
+
+# ------------------------------------------------------------
+#  调试杖
+# ------------------------------------------------------------
+wand:
+  enabled: true
+  material: BLAZE_ROD
+  name: "&b&l边界调试杖"
+  lore:
+    - "&7右键 &f添加边界节点"
+    - "&7左键 &f撤销上一个节点"
+    - "&7潜行 + 右键 &f开关边界线预览"
+    - "&8· 至少 3 个节点后区域生效"
+  # 手持调试杖时自动显示边界线（需要 borderguard.admin 权限）
+  show-line-when-holding: true
+
+# ------------------------------------------------------------
+#  边界线渲染（只发给开着的 OP，普通玩家看不到）
+# ------------------------------------------------------------
+render:
+  interval-ticks: 4          # 刷新间隔，越大越省性能
+  step: 0.7                  # 线上粒子间距（格），越小越密
+  radius: 40                 # 只绘制这个水平半径内的边
+  y-offset: 1.0              # 边界线相对玩家脚底的高度
+  max-particles-per-tick: 900
+  line-particle: SPELL_WITCH # 边界线粒子
+  node-particle: FLAME       # 节点标记粒子
+  node-pillar: 3.0           # 节点立柱高度（格）
+
+# ------------------------------------------------------------
+#  触碰边界的特效（默认：一阵黑烟）
+# ------------------------------------------------------------
+effects:
+  enabled: true
+  view-distance: 24          # 多少格内的玩家能看到这团烟
+  cooldown-ms: 700           # 单个玩家的特效冷却
+  sound: BLOCK_FIRE_EXTINGUISH
+  sound-volume: 0.45
+  sound-pitch: 0.7
+  # 粒子组，可自由增删；particle 写 Bukkit 粒子名
+  # 常用：SMOKE_LARGE(黑烟) SMOKE_NORMAL(淡烟) FLAME(火) SPELL_WITCH(紫)
+  #      CLOUD(白云) PORTAL(末影) LAVA(火星) CRIT_MAGIC(暴击星星)
+  touch:
+    - particle: SMOKE_LARGE
+      count: 16
+      offset: 0.30
+      speed: 0.02
+    - particle: SMOKE_NORMAL
+      count: 10
+      offset: 0.45
+      speed: 0.01

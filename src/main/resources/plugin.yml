@@ -1,0 +1,21 @@
+name: BorderGuard
+main: com.qingming.borderguard.BorderGuardPlugin
+version: 1.0.0
+author: QingMing
+description: 玩家行动区域限制 · 多边形边界节点 / 粒子边界线 / 越界拦截
+website: https://github.com/NeonVortex775
+
+commands:
+  border:
+    description: 边界管理主指令
+    usage: /border help
+    aliases: [bg, boundary, bianjie, 边界]
+    permission: borderguard.admin
+
+permissions:
+  borderguard.admin:
+    description: 允许使用边界管理指令与调试杖
+    default: op
+  borderguard.bypass:
+    description: 无视边界限制
+    default: false
